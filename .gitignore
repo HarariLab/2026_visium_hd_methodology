@@ -1,1 +1,15 @@
 .DS_Store
+main_analysis/segmentation/no_threshold_10x/AD2_S1_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/AD2_S1_stardist/nuclei.pkl
+main_analysis/segmentation/no_threshold_10x/AD2_S2_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/AD2_S2_stardist/nuclei.pkl
+main_analysis/segmentation/no_threshold_10x/AD3_S1_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/AD3_S1_stardist/nuclei.pkl
+main_analysis/segmentation/no_threshold_10x/AD4_S1_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/AD4_S1_stardist/nuclei.pkl
+main_analysis/segmentation/no_threshold_10x/AD5_S1_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/AD5_S1_stardist/nuclei.pkl
+main_analysis/segmentation/no_threshold_10x/ffpeAD2_S3_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/ffpeAD2_S3_stardist/nuclei.pkl
+main_analysis/segmentation/no_threshold_10x/ffpeAD3_S1_stardist/nuclei.npz
+main_analysis/segmentation/no_threshold_10x/ffpeAD3_S1_stardist/nuclei.pkl

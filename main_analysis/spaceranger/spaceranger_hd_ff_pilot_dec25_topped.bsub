@@ -1,0 +1,80 @@
+#!/bin/bash
+#SBATCH --job-name=spaceranger-visium-hd-ff-12-25
+#SBATCH --account=pas2713
+#SBATCH --nodes=1
+#SBATCH --mem 136G
+#SBATCH --ntasks-per-node=24
+#SBATCH --output=logs/ff-12-25-spaceranger-%J.log
+#SBATCH --array=1-2
+#SBATCH --time=8:00:00
+
+# move to output dir
+cd /fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/outs/spaceranger_count/dec_2025_topped
+
+# references
+ref_transcriptome=/fs/ess/PAS2713/References/Human/GEX/refdata-gex-GRCh38-2020-A
+ref_probeset=/fs/ess/PAS2713/References/Human/Visium/Visium_Human_Transcriptome_Probe_Set_v2.0_GRCh38-2020-A.csv
+
+# set directory for fastqs and images
+if_images="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/Images/IF"
+cyt_images="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/Images/Cytassist"
+fastqs_1="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/GEX/25517-01-12102025"
+fastqs_2="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/GEX/25517-01-11252025"
+align_jsons="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/Misc/alignments"
+
+align_meta="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FF_Pilot/Metadata/visium_hd_ff_pilot-12-10-25_sample_meta.csv"
+
+# index based on task ID
+let index="$SLURM_ARRAY_TASK_ID"
+
+# add one to index to account for the header line
+let "index=index+1"
+echo $index
+
+metadata=$(head -n $index $align_meta | tail -n 1)
+echo $metadata
+
+sample_name=$(echo $metadata | cut -d ',' -f 1)
+echo ${sample_name}
+
+fastq_name=$(echo $metadata | cut -d ',' -f 2)
+echo ${fastq_name}
+
+area=$(echo $metadata | cut -d ',' -f 4)
+echo $area
+
+slide_id=$(echo $metadata | cut -d ',' -f 3)
+echo ${slide_id}
+
+slide_name=$(echo $metadata | cut -d ',' -f 2)
+echo ${slide_name}
+
+# IF image file
+if_image=${if_images}/${sample_name}"_RGB.tif"
+echo ${if_image}
+
+# CytAssist image file
+cyt_image=${cyt_images}/${slide_name}"_"${slide_id}"_"${area}"_"${sample_name}".tif"
+echo ${cyt_image}
+
+# Images alignment JSON file
+align_json=${align_jsons}/${slide_id}"-"${area}"-fiducials-image-registration.json"
+echo ${align_json}
+
+
+# run spaceranger
+/fs/ess/PAS2713/aladyevae/work/2024_ad_spatial_hd/tools/spaceranger-3.1.3/spaceranger count  \
+    --id=${sample_name} \
+    --sample=${fastq_name} \
+    --create-bam=true \
+    --area=${area} \
+    --slide=${slide_id} \
+    --dapi-index=3 \
+    --transcriptome="${ref_transcriptome}" \
+    --probe-set="${ref_probeset}" \
+    --darkimage="${if_image}" \
+    --cytaimage="${cyt_image}" \
+    --loupe-alignment="${align_json}" \
+    --fastqs="${fastqs_1}","${fastqs_2}" \
+    --localcores=24 \
+    --localmem=128

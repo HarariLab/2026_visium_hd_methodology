@@ -1,0 +1,79 @@
+#!/bin/bash
+#SBATCH --job-name=spaceranger-visium-hd-ffpe-10-24
+#SBATCH --account=pas2713
+#SBATCH --nodes=1
+#SBATCH --mem 136G
+#SBATCH --ntasks-per-node=24
+#SBATCH --output=logs/ffpe-10-24-spaceranger-%J.log
+#SBATCH --array=1-2
+#SBATCH --time=24:00:00
+
+# move to output dir
+cd /fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FFPE_Pilot/outs/spaceranger_merged_v2/
+
+# references
+ref_transcriptome=/fs/ess/PAS2713/References/Human/GEX/refdata-gex-GRCh38-2020-A
+ref_probeset=/fs/ess/PAS2713/References/Human/Visium/Visium_Human_Transcriptome_Probe_Set_v2.0_GRCh38-2020-A.csv
+
+# set directory for fastqs and images
+if_images="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FFPE_Pilot/Images/IF"
+cyt_images="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FFPE_Pilot/Images/CytAssist"
+align_jsons="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FFPE_Pilot/Misc/alignments"
+fastqs="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FFPE_Pilot/GEX"
+
+align_meta="/fs/ess/PAS2713/Data/Spatial/VisiumHD/Visium_HD_FFPE_Pilot/Metadata/visium_hd_ffpe-10-24_sample_meta.csv"
+
+# index based on task ID
+let index="$SLURM_ARRAY_TASK_ID"
+
+# add one to index to account for the header line
+let "index=index+1"
+echo $index
+
+metadata=$(head -n $index $align_meta | tail -n 1)
+echo $metadata
+
+sample_name=$(echo $metadata | cut -d ',' -f 1)
+echo ${sample_name}
+
+fastq_name=$(echo $metadata | cut -d ',' -f 2)
+echo ${fastq_name}
+
+slide_name=$(echo $metadata | cut -d ',' -f 3)
+echo ${slide_name}
+
+slide_id=$(echo $metadata | cut -d ',' -f 4)
+echo ${slide_id}
+
+area=$(echo $metadata | cut -d ',' -f 5)
+echo $area
+
+# IF image file
+if_image=${if_images}/${sample_name}"_intensity.tif"
+echo ${if_image}
+
+# CytAssist image file
+cyt_image=${cyt_images}/${slide_name}"_"${slide_id}"_"${area}"_"${sample_name}".tif"
+echo ${cyt_image}
+
+# Images alignment JSON file
+align_json=${align_jsons}/${slide_id}"-"${area}"-fiducials-image-registration.json"
+echo ${align_json}
+
+
+# run spaceranger
+/fs/ess/PAS2713/aladyevae/work/2024_ad_spatial_hd/tools/spaceranger-3.1.3/spaceranger count  \
+    --id=${sample_name} \
+    --sample=${fastq_name} \
+    --create-bam=true \
+    --area=${area} \
+    --slide=${slide_id} \
+    --transcriptome="${ref_transcriptome}" \
+    --probe-set="${ref_probeset}" \
+    --cytaimage="${cyt_image}" \
+    --fastqs="${fastqs}" \
+    --localcores=24 \
+    --localmem=128 \
+    --dapi-index=3 \
+    --darkimage="${if_image}" \
+    --loupe-alignment="${align_json}"

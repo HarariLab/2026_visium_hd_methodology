@@ -27,3 +27,5 @@ main_analysis/bin2cell/no_threshold_10x/expanded_labels/AD4_S1_expanded_label.cs
 main_analysis/bin2cell/no_threshold_10x/expanded_labels/AD5_S1_expanded_label.csv
 main_analysis/bin2cell/no_threshold_10x/expanded_labels/ffpeAD2_S3_expanded_label.csv
 main_analysis/bin2cell/no_threshold_10x/expanded_labels/ffpeAD3_S1_expanded_label.csv
+main_analysis/data/ffpe_ff_pilot_batch_1_pre_qc_v2.h5ad
+main_analysis/data/ffpe_ff_pilot_batch_1_post_qc_v2.h5ad
